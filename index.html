@@ -192,47 +192,6 @@
     line-height: 1.55;
   }
 
-  /* Action row: Exchange Contact + download */
-  .actions {
-    display: flex;
-    gap: 10px;
-    padding: 0 20px 20px;
-  }
-  .exchange {
-    flex: 1;
-    display: inline-flex; align-items: center; justify-content: center; gap: 9px;
-    height: 50px;
-    border: none;
-    border-radius: 14px;
-    background: linear-gradient(180deg, var(--xbox-green-bright), var(--xbox-green));
-    color: #06210a;
-    font-family: var(--font);
-    font-weight: 800;
-    font-size: 1rem;
-    letter-spacing: 0.2px;
-    cursor: pointer;
-    box-shadow: 0 6px 20px var(--xbox-green-glow);
-    transition: transform .15s ease, filter .15s ease;
-    -webkit-tap-highlight-color: transparent;
-  }
-  .exchange:hover { filter: brightness(1.06); transform: translateY(-1px); }
-  .exchange:active { transform: translateY(0); }
-  .exchange svg { width: 20px; height: 20px; }
-  .dl {
-    flex: none;
-    width: 50px; height: 50px;
-    display: grid; place-items: center;
-    border-radius: 14px;
-    background: var(--panel-2);
-    border: 1px solid rgba(22,198,12,0.34);
-    color: var(--xbox-green-bright);
-    cursor: pointer;
-    transition: background .15s ease, transform .15s ease;
-    -webkit-tap-highlight-color: transparent;
-  }
-  .dl:hover { background: var(--panel-hover); transform: translateY(-1px); }
-  .dl svg { width: 20px; height: 20px; }
-
   /* XBOX brand mark on the banner */
   .brandmark {
     position: absolute;
@@ -500,15 +459,6 @@
       ID@XBOX • Building &amp; championing indie games. Tap in below.
     </p>
     </div><!-- pc-id -->
-    <div class="actions">
-      <button class="exchange" id="exchange" type="button">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="11.5" r="2.1"/><path d="M14 10h4M14 13.5h4M5.6 16.4a3.4 3.4 0 0 1 6.8 0"/></svg>
-        Exchange Contact
-      </button>
-      <button class="dl" id="dlContact" type="button" aria-label="Download my contact card">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 11l5 5 5-5"/><path d="M5 21h14"/></svg>
-      </button>
-    </div>
     </section>
 
     <!-- Featured: latest Indie Selects -->
@@ -716,40 +666,6 @@ CONFIG.sections.forEach((sec) => {
 
   firstTab = false;
 });
-
-// Exchange Contact -> download a vCard (.vcf)
-function buildVCard() {
-  const c = CONFIG;
-  const parts = (c.name || '').trim().split(/\s+/);
-  const last  = parts.length > 1 ? parts[parts.length - 1] : '';
-  const first = parts.length > 1 ? parts.slice(0, -1).join(' ') : (parts[0] || '');
-  const L = ['BEGIN:VCARD', 'VERSION:3.0'];
-  L.push('N:' + last + ';' + first + ';;;');
-  L.push('FN:' + c.name);
-  L.push('ORG:XBOX \u2014 ID@XBOX');
-  L.push('TITLE:ID@XBOX');
-  if (c.tagline) L.push('NOTE:' + c.tagline.replace(/[\r\n,;]+/g, ' '));
-  L.push('URL:' + location.href.split(/[?#]/)[0]);
-  (c.sections || []).forEach(s => (s.links || []).forEach(l => { if (l.url) L.push('URL:' + l.url); }));
-  if (c.avatar && c.avatar.indexOf('base64,') > -1) {
-    const b64  = c.avatar.split('base64,')[1];
-    const type = /jpe?g/i.test(c.avatar) ? 'JPEG' : 'PNG';
-    L.push('PHOTO;ENCODING=b;TYPE=' + type + ':' + b64);
-  }
-  L.push('END:VCARD');
-  return L.join('\r\n');
-}
-function downloadContact() {
-  const blob = new Blob([buildVCard()], { type: 'text/vcard;charset=utf-8' });
-  const url  = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = (CONFIG.name || 'contact').replace(/\s+/g, '-') + '.vcf';
-  document.body.appendChild(a); a.click(); a.remove();
-  setTimeout(() => URL.revokeObjectURL(url), 1500);
-}
-document.getElementById('exchange').addEventListener('click', downloadContact);
-document.getElementById('dlContact').addEventListener('click', downloadContact);
 
 // Theme (light / dark) with persistence + system default
 (function () {
